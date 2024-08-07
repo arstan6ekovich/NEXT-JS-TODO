@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import scss from "./TodoList.module.scss";
@@ -41,18 +41,20 @@ const TodoList = () => {
   const [uploadTodosMutation] = useUploadTodosMutation();
   const [deleteTodosMutation] = useDeleteTodosMutation();
 
+  // Используйте хук RTK Query для получения данных
   const { data: todosData, error, isLoading } = useGetTodosQuery();
+
   const [todos, setTodos] = useState<IFTodo[]>([]);
   const [isEditId, setIsEditId] = useState<number | null>(null);
 
   useEffect(() => {
     if (todosData) {
       // Преобразуйте данные в формат IFTodo[], если это необходимо
-      const formattedTodos = todosData.map((todo: IFTodos) => ({
+      const formattedTodos: IFTodo[] = todosData.map((todo: IFTodos) => ({
         _id: todo._id,
         title: todo.title,
         age: todo.age,
-        file: todo.file.join(','), // Пример преобразования массива в строку
+        file: todo.file[0], // предполагается, что вы хотите использовать первый элемент массива file
         createAt: todo.createAt,
         updateAt: todo.updateAt,
       }));
@@ -67,7 +69,7 @@ const TodoList = () => {
 
     const { data: responseUpload } = await axios.post(upload, formData);
 
-    const newData = {
+    const newData: IFTodo = {
       _id: data._id,
       title: data.title,
       age: data.age,
@@ -86,7 +88,8 @@ const TodoList = () => {
     formData.append("file", file);
     const { data: responseUpload } = await axios.post(upload, formData);
 
-    const newData = {
+    const newData: IFTodo = {
+      _id: data._id,
       title: data.title,
       age: data.age,
       file: responseUpload.url,
@@ -116,8 +119,8 @@ const TodoList = () => {
     <div className={scss.TodoList}>
       <h1>TodoList</h1>
       <form onSubmit={handleSubmitAdd(onSubmit)}>
-        <input type="text" {...registerAdd("title", { required: true })} />
-        <input type="number" {...registerAdd("age", { required: true })} />
+        <input type="text" placeholder="User name" {...registerAdd("title", { required: true })} />
+        <input type="number" placeholder="User age" {...registerAdd("age", { required: true })} />
         <input type="file" {...registerAdd("file", { required: true })} />
         <button type="submit">Submit</button>
       </form>
