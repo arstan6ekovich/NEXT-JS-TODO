@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import axios from "axios";
 import { useEffect, useState } from "react";
 import scss from "./TodoList.module.scss";
@@ -8,7 +9,6 @@ import {
   useDeleteTodosMutation,
   useGetTodosQuery,
   usePostTodosMutation,
-  useUploadTodosMutation,
 } from "../redux/api/todo";
 
 interface IFTodos {
@@ -38,7 +38,6 @@ const TodoList = () => {
 
   const [deleteTodoMutation] = useDeleteTodoMutation();
   const [postTodosMutation] = usePostTodosMutation();
-  const [uploadTodosMutation] = useUploadTodosMutation();
   const [deleteTodosMutation] = useDeleteTodosMutation();
 
   // Используйте хук RTK Query для получения данных
@@ -49,16 +48,8 @@ const TodoList = () => {
 
   useEffect(() => {
     if (todosData) {
-      // Преобразуйте данные в формат IFTodo[], если это необходимо
-      const formattedTodos: IFTodo[] = todosData.map((todo: IFTodos) => ({
-        _id: todo._id,
-        title: todo.title,
-        age: todo.age,
-        file: todo.file[0], // предполагается, что вы хотите использовать первый элемент массива file
-        createAt: todo.createAt,
-        updateAt: todo.updateAt,
-      }));
-      setTodos(formattedTodos);
+      // @ts-ignore
+      setTodos(todosData);
     }
   }, [todosData]);
 
@@ -69,8 +60,8 @@ const TodoList = () => {
 
     const { data: responseUpload } = await axios.post(upload, formData);
 
-    const newData: IFTodo = {
-      _id: Date.now(), // Вы можете использовать UUID или другой уникальный идентификатор
+    const newData = {
+      _id: data._id,
       title: data.title,
       age: data.age,
       file: responseUpload.url,
@@ -78,7 +69,9 @@ const TodoList = () => {
       updateAt: new Date().toISOString(),
     };
 
+    //@ts-ignore
     const { data: responseTodo } = await postTodosMutation(newData);
+    //@ts-ignore
     setTodos(responseTodo);
   };
 
@@ -88,8 +81,7 @@ const TodoList = () => {
     formData.append("file", file);
     const { data: responseUpload } = await axios.post(upload, formData);
 
-    const newData: IFTodo = {
-      _id: data._id,
+    const newData = {
       title: data.title,
       age: data.age,
       file: responseUpload.url,
@@ -104,15 +96,19 @@ const TodoList = () => {
 
   const TodoDelete = async (_id: number) => {
     const { data } = await deleteTodoMutation(_id);
+    //@ts-ignore
     setTodos(data);
   };
 
   const TodosDelete = async () => {
+    //@ts-ignore
     const { data } = await deleteTodosMutation(api);
+    //@ts-ignore
     setTodos(data);
   };
 
   if (isLoading) return <p>Loading...</p>;
+    //@ts-ignore
   if (error) return <p>Error: {error.message}</p>;
 
   return (
@@ -130,8 +126,8 @@ const TodoList = () => {
           <div key={el._id}>
             {isEditId === el._id ? (
               <form onSubmit={handleSubmitEdit(onSubmitEdit)}>
-                <input type="text" {...registerEdit("title", { required: true })} />
-                <input type="number" {...registerEdit("age", { required: true })} />
+                <input  type="text" {...registerEdit("title", { required: true })} />
+                <input  type="number" {...registerEdit("age", { required: true })} />
                 <input type="file" {...registerEdit("file", { required: true })} />
                 <button type="submit">Edit</button>
                 <button onClick={() => setIsEditId(null)}>Cancel</button>

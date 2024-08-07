@@ -29,24 +29,6 @@ const api = index.injectEndpoints({
       }),
       invalidatesTags: ["todo"],
     }),
-    UploadTodos: build.mutation<TODO.PostUploadFileRes, TODO.PostUploadFileReq>(
-      {
-        query: (data) => ({
-          url: "/upload/file",
-          method: "POST",
-          body: data,
-        }),
-        invalidatesTags: ["upload"],
-      }
-    ),
-    IsEditIdTodos: build.mutation<TODO.PatchTodoRes, TODO.PatchTodoReq>({
-      query: ({ _id, data }) => ({
-        url: `/${_id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["todo"],
-    }),
   }),
 });
 
@@ -55,6 +37,4 @@ export const {
   useDeleteTodoMutation,
   usePostTodosMutation,
   useDeleteTodosMutation,
-  useUploadTodosMutation,
-  useIsEditIdTodosMutation
 } = api;
