@@ -1,4 +1,3 @@
-"use client"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import scss from "./TodoList.module.scss";
@@ -70,7 +69,7 @@ const TodoList = () => {
     const { data: responseUpload } = await axios.post(upload, formData);
 
     const newData: IFTodo = {
-      _id: data._id,
+      _id: Date.now(), // Вы можете использовать UUID или другой уникальный идентификатор
       title: data.title,
       age: data.age,
       file: responseUpload.url,
