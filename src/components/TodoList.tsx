@@ -7,7 +7,6 @@ import {
   useDeleteTodoMutation,
   useDeleteTodosMutation,
   useGetTodosQuery,
-  useIsEditIdTodosMutation,
   usePostTodosMutation,
   useUploadTodosMutation,
 } from "../redux/api/todo";
@@ -41,9 +40,10 @@ const TodoList = () => {
   const [postTodosMutation] = usePostTodosMutation();
   const [uploadTodosMutation] = useUploadTodosMutation();
   const [deleteTodosMutation] = useDeleteTodosMutation();
-  const [isEditIdTodosMutation] = useIsEditIdTodosMutation();
 
-  const { data: todosData } = useGetTodosQuery();
+  // Используйте хук RTK Query для получения данных
+  const { data: todosData, error, isLoading } = useGetTodosQuery();
+
   const [todos, setTodos] = useState<IFTodo[]>([]);
   const [isEditId, setIsEditId] = useState<number | null>(null);
 
@@ -87,10 +87,7 @@ const TodoList = () => {
       updateAt: new Date().toISOString(),
     };
 
-    const { data: responseData } = await axios(`${api}/${isEditId}`, {
-      method: 'PUT',
-      data: newData
-    });
+    const { data: responseData } = await axios.put(`${api}/${isEditId}`, newData);
     setTodos(responseData);
     setIsEditId(null);
   };
@@ -104,6 +101,9 @@ const TodoList = () => {
     const { data } = await deleteTodosMutation(api);
     setTodos(data);
   };
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div className={scss.TodoList}>
