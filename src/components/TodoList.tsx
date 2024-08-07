@@ -41,15 +41,22 @@ const TodoList = () => {
   const [uploadTodosMutation] = useUploadTodosMutation();
   const [deleteTodosMutation] = useDeleteTodosMutation();
 
-  // Используйте хук RTK Query для получения данных
   const { data: todosData, error, isLoading } = useGetTodosQuery();
-
   const [todos, setTodos] = useState<IFTodo[]>([]);
   const [isEditId, setIsEditId] = useState<number | null>(null);
 
   useEffect(() => {
     if (todosData) {
-      setTodos(todosData);
+      // Преобразуйте данные в формат IFTodo[], если это необходимо
+      const formattedTodos = todosData.map((todo: IFTodos) => ({
+        _id: todo._id,
+        title: todo.title,
+        age: todo.age,
+        file: todo.file.join(','), // Пример преобразования массива в строку
+        createAt: todo.createAt,
+        updateAt: todo.updateAt,
+      }));
+      setTodos(formattedTodos);
     }
   }, [todosData]);
 
