@@ -34,19 +34,24 @@ const api = process.env.NEXT_PUBLIC_API!;
 const upload = process.env.NEXT_PUBLIC_UPLOAD!;
 
 const TodoList = () => {
-  const { register: registerAdd, handleSubmit: handleSubmitAdd } =
-    useForm<IFTodos>();
-  const { register: registerEdit, handleSubmit: handleSubmitEdit } =
-    useForm<IFTodos>();
+  const { register: registerAdd, handleSubmit: handleSubmitAdd } = useForm<IFTodos>();
+  const { register: registerEdit, handleSubmit: handleSubmitEdit } = useForm<IFTodos>();
 
   const [deleteTodoMutation] = useDeleteTodoMutation();
   const [postTodosMutation] = usePostTodosMutation();
   const [uploadTodosMutation] = useUploadTodosMutation();
   const [deleteTodosMutation] = useDeleteTodosMutation();
   const [isEditIdTodosMutation] = useIsEditIdTodosMutation();
+
+  const { data: todosData } = useGetTodosQuery();
   const [todos, setTodos] = useState<IFTodo[]>([]);
   const [isEditId, setIsEditId] = useState<number | null>(null);
-  console.log(todos);
+
+  useEffect(() => {
+    if (todosData) {
+      setTodos(todosData);
+    }
+  }, [todosData]);
 
   const onSubmit: SubmitHandler<IFTodos> = async (data) => {
     const file = data.file[0];
@@ -64,21 +69,9 @@ const TodoList = () => {
       updateAt: new Date().toISOString(),
     };
 
-    // @ts-ignore
     const { data: responseTodo } = await postTodosMutation(newData);
-    // @ts-ignore
     setTodos(responseTodo);
   };
-
-  const GetTodos = async () => {
-    const { data } = await useGetTodosQuery();
-    // @ts-ignore
-    setTodos(data);
-  };
-
-  useEffect(() => {
-    GetTodos();
-  }, []);
 
   const onSubmitEdit: SubmitHandler<IFTodos> = async (data) => {
     const file = data.file[0];
@@ -94,28 +87,27 @@ const TodoList = () => {
       updateAt: new Date().toISOString(),
     };
 
-    // @ts-ignore
-    const { data: responseData } = await axios(`${api}/${isEditId}`, newData);
-    // @ts-ignore
+    const { data: responseData } = await axios(`${api}/${isEditId}`, {
+      method: 'PUT',
+      data: newData
+    });
     setTodos(responseData);
     setIsEditId(null);
   };
 
   const TodoDelete = async (_id: number) => {
     const { data } = await deleteTodoMutation(_id);
-    // @ts-ignore
     setTodos(data);
   };
 
   const TodosDelete = async () => {
-    // @ts-ignore
     const { data } = await deleteTodosMutation(api);
-    // @ts-ignore
     setTodos(data);
   };
+
   return (
     <div className={scss.TodoList}>
-      <h1>TodoList</h1>{" "}
+      <h1>TodoList</h1>
       <form onSubmit={handleSubmitAdd(onSubmit)}>
         <input type="text" {...registerAdd("title", { required: true })} />
         <input type="number" {...registerAdd("age", { required: true })} />
@@ -127,23 +119,13 @@ const TodoList = () => {
         {todos.map((el) => (
           <div key={el._id}>
             {isEditId === el._id ? (
-              <>
-                <form onSubmit={handleSubmitEdit(onSubmitEdit)}>
-                  <input
-                    type="text"
-                    {...registerEdit("title", { required: true })}
-                  />
-                  <input
-                    type="number"
-                    {...registerEdit("age", { required: true })}
-                  />
-                  <input
-                    type="file"
-                    {...registerEdit("file", { required: true })}
-                  />
-                  <button type="submit">Submit</button>
-                </form>
-              </>
+              <form onSubmit={handleSubmitEdit(onSubmitEdit)}>
+                <input type="text" {...registerEdit("title", { required: true })} />
+                <input type="number" {...registerEdit("age", { required: true })} />
+                <input type="file" {...registerEdit("file", { required: true })} />
+                <button type="submit">Edit</button>
+                <button onClick={() => setIsEditId(null)}>Cancel</button>
+              </form>
             ) : (
               <>
                 <img src={el.file} alt={el.title} />
